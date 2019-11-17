@@ -58,16 +58,16 @@ class TimeAPM(str: String) :
 
     //Smaller than new => 1
     //Bigger than new => 0
-    override fun compareTo(time: TimeAPM): Int {
-        if (this.partOfDay[0].toInt() < time.partOfDay[0].toInt()) return 1
-        if (this.partOfDay[0].toInt() > time.partOfDay[0].toInt()) return 0
+    override fun compareTo(other: TimeAPM): Int {
+        if (this.partOfDay[0].toInt() < other.partOfDay[0].toInt()) return 1
+        if (this.partOfDay[0].toInt() > other.partOfDay[0].toInt()) return 0
         else {
-            if (this.first < time.first) return 1
-            if (this.first > time.first) return 0
-            if (this.second < time.second) return 1
-            if (this.second < time.second) return 1
-            if (this.third < time.third) return 1
-            if (this.third > time.third) return 1
+            if (this.first < other.first) return 1
+            if (this.first > other.first) return 0
+            if (this.second < other.second) return 1
+            if (this.second < other.second) return 1
+            if (this.third < other.third) return 1
+            if (this.third > other.third) return 1
         }
         return 0
     }

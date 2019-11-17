@@ -1,6 +1,8 @@
 package lesson3;
 
 import kotlin.NotImplementedError;
+//Can not import annotations
+import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,7 +11,7 @@ import java.util.*;
 // Attention: comparable supported but comparator is not
 public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implements CheckableSortedSet<T> {
 
-    private static class Node<T> {
+    private static class Node<T> extends Object{
         final T value;
 
         Node<T> left = null;
@@ -68,14 +70,64 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         return 1 + Math.max(height(node.left), height(node.right));
     }
 
+
     /**
      * Удаление элемента в дереве
      * Средняя
      */
     @Override
     public boolean remove(Object o) {
-        // TODO
-        throw new NotImplementedError();
+        if (o == null) {
+            throw new IllegalArgumentException();
+        }
+        if (!this.contains(0)) return false;
+        T t = (T) o;
+        Node n = find(t);
+
+        return true;
+    }
+
+        //Recursive algorithm
+    Node RecRemove(Node root, Object v)
+    {
+        // If the tree is empty
+        if (root == null)  return root;
+        T value = (T) v;
+        // Going down the tree
+        if (value.compareTo((T) root.value) < 0)
+            root.left = RecRemove(root.left, value);
+        else if (value.compareTo((T) root.value) > 0)
+            root.right = RecRemove(root.right, value);
+
+            // if key is same as root's key, then This is the node
+            // to be deleted
+        else
+        {
+            // Scheme for node with only one child or no child
+            if (root.left == null)
+                return root.right;
+            else if (root.right == null)
+                return root.left;
+
+            // Scheme for node with two children: Getting the smallest in the right subtree)
+            root.value = minValue(root.right);
+
+            // Delete others in the right branch
+            root.right = RecRemove(root.right, root.value);
+        }
+
+        return root;
+    }
+
+    Object minValue(Node root)
+    {
+        Object minv = root.value;
+        while (root.left != null)
+        {
+            minv = root.left.value;
+            root = root.left;
+        }
+        return minv;
     }
 
     @Override
@@ -106,10 +158,18 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         }
     }
 
+    //Stack for the iterator realization
+    Stack<Node> stack;
+
     public class BinaryTreeIterator implements Iterator<T> {
 
         private BinaryTreeIterator() {
-            // Добавьте сюда инициализацию, если она необходима
+            // Init added
+            Stack stack = new Stack<Node>();
+            while (root != null) {
+                stack.push(root);
+                root = root.left;
+            }
         }
 
         /**
@@ -118,8 +178,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public boolean hasNext() {
-            // TODO
-            throw new NotImplementedError();
+            return !stack.isEmpty();
         }
 
         /**
@@ -128,8 +187,16 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public T next() {
-            // TODO
-            throw new NotImplementedError();
+            Node node = stack.pop();
+            T result = (T) node.value;
+            if (node.right != null) {
+                node = node.right;
+                while (node != null) {
+                    stack.push(node);
+                    node = node.left;
+                }
+            }
+            return result;
         }
 
         /**
