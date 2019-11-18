@@ -8,10 +8,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+
 // Attention: comparable supported but comparator is not
 public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implements CheckableSortedSet<T> {
 
-    private static class Node<T> extends Object{
+    private static class Node<T> extends Object {
         final T value;
 
         Node<T> left = null;
@@ -37,12 +38,10 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         Node<T> newNode = new Node<>(t);
         if (closest == null) {
             root = newNode;
-        }
-        else if (comparison < 0) {
+        } else if (comparison < 0) {
             assert closest.left == null;
             closest.left = newNode;
-        }
-        else {
+        } else {
             assert closest.right == null;
             closest.right = newNode;
         }
@@ -82,16 +81,28 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         }
         if (!this.contains(0)) return false;
         T t = (T) o;
-        Node n = find(t);
-
+        Node node = findDel(t);
+        if (node.left.value == t) {
+            Node i = node.left.right;
+            node.left = node.left.left;
+            //Передать ветвь i кому-то
+            findEmptyRight().right = i;
+        } else {
+            Node i = node.left.left;
+            node.right = node.right.right;
+            //Передать ветвь i кому-то
+            if (i != null) {
+                findEmptyLeft().left = i;
+            }
+        }
         return true;
     }
 
-        //Recursive algorithm
-    Node RecRemove(Node root, Object v)
-    {
+    //Recursive algorithm
+    //(Was not used here)
+   /* Node RecRemove(Node root, Object v) {
         // If the tree is empty
-        if (root == null)  return root;
+        if (root == null) return root;
         T value = (T) v;
         // Going down the tree
         if (value.compareTo((T) root.value) < 0)
@@ -101,8 +112,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
 
             // if key is same as root's key, then This is the node
             // to be deleted
-        else
-        {
+        else {
             // Scheme for node with only one child or no child
             if (root.left == null)
                 return root.right;
@@ -117,25 +127,79 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         }
 
         return root;
-    }
+    }*/
 
-    Object minValue(Node root)
-    {
+    /*Object minValue(Node root) {
         Object minv = root.value;
-        while (root.left != null)
-        {
+        while (root.left != null) {
             minv = root.left.value;
             root = root.left;
         }
         return minv;
     }
-
+*/
     @Override
     public boolean contains(Object o) {
         @SuppressWarnings("unchecked")
         T t = (T) o;
         Node<T> closest = find(t);
         return closest != null && t.compareTo(closest.value) == 0;
+    }
+
+    //Finding node with empty left branch
+    private Node<T> findEmptyLeft() {
+        if (root == null) throw new NoSuchElementException();
+        return findEmptyLeft(root);
+    }
+
+    private Node<T> findEmptyLeft(Node<T> start) {
+        if (start.left == null) {
+            return start;
+        } else {
+            Node i = findEmptyLeft(start.left);
+            Node j = findEmptyLeft(start.right);
+            if (height(i) <= height(j))
+                return i;
+            else return j;
+        }
+    }
+
+    //Finding node with empty right branch
+    private Node<T> findEmptyRight() {
+        if (root == null) throw new NoSuchElementException();
+        return findEmptyRight(root);
+    }
+
+    private Node<T> findEmptyRight(Node<T> start) {
+        if (start.right == null) {
+            return start;
+        } else {
+            Node i = findEmptyLeft(start.left);
+            Node j = findEmptyLeft(start.right);
+            if (height(i) <= height(j))
+                return i;
+            else return j;
+        }
+    }
+
+    //Finding node to be removed
+    private Node<T> findDel(T value) {
+        if (root == null) return null;
+        return findDel(root, value);
+    }
+
+    private Node<T> findDel(Node<T> start, T value) {
+        int comparisonLeft = value.compareTo(start.left.value);
+        int comparisonRight = value.compareTo(start.left.value);
+        if (start.left != null)
+            if (comparisonLeft == 0) {
+                return start;
+            } else return findDel(start.left, value);
+        if (start.right != null)
+            if (comparisonRight == 0) {
+                return start;
+            } else return findDel(start.right, value);
+        throw new NoSuchElementException();
     }
 
     private Node<T> find(T value) {
@@ -147,12 +211,10 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         int comparison = value.compareTo(start.value);
         if (comparison == 0) {
             return start;
-        }
-        else if (comparison < 0) {
+        } else if (comparison < 0) {
             if (start.left == null) return start;
             return find(start.left, value);
-        }
-        else {
+        } else {
             if (start.right == null) return start;
             return find(start.right, value);
         }
@@ -205,8 +267,24 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public void remove() {
-            // TODO
-            throw new NotImplementedError();
+            if (hasNext()) {
+                Node n = (find(next()));
+                T t = (T) n.value;
+                Node node = findDel(t);
+                if (node.left.value == n) {
+                    Node i = node.left.right;
+                    node.left = node.left.left;
+                    //Передать ветвь i кому-то
+                    findEmptyRight().right = i;
+                } else {
+                    Node i = node.left.left;
+                    node.right = node.right.right;
+                    //Передать ветвь i кому-то
+                    if (i != null) {
+                        findEmptyLeft().left = i;
+                    }
+                }
+            } else throw new NoSuchElementException();
         }
     }
 
