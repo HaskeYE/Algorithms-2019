@@ -1,6 +1,7 @@
 package lesson5
 
 import lesson5.impl.GraphBuilder
+import org.junit.Test
 import org.junit.jupiter.api.Tag
 import kotlin.test.*
 
