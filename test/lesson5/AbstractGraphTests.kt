@@ -2,7 +2,6 @@ package lesson5
 
 import lesson5.impl.GraphBuilder
 import kotlin.test.assertEquals
-import org.junit.Test
 import kotlin.test.assertTrue
 
 abstract class AbstractGraphTests {
