@@ -28,6 +28,8 @@ package lesson5
  * Справка: Эйлеров цикл -- это цикл, проходящий через все рёбра
  * связного графа ровно по одному разу
  */
+
+//Finally working
 fun Graph.findEulerLoop(): List<Graph.Edge> {
     TODO()
 }
