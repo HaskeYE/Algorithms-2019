@@ -2,7 +2,6 @@ package lesson5
 
 import lesson5.impl.GraphBuilder
 import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
 import kotlin.test.*
 
 class VoyagerTest {
