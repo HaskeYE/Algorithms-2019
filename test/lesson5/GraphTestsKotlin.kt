@@ -1,7 +1,9 @@
 package lesson5
 
 import org.junit.jupiter.api.Tag
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
+/*import kotlin.test.Test*/
+
 
 class GraphTestsKotlin : AbstractGraphTests() {
 
