@@ -87,7 +87,7 @@ fun Graph.findEulerLoop(): List<Graph.Edge> {
         do {
             //Сложность = O((к-ва вершин) * (к-во рёбер))
 
-            cycle = findCycleFrom(vertex) {
+            cycle = cycleFromStartVertex(vertex) {
                 it !in deleted
             }
 
@@ -121,9 +121,9 @@ fun Graph.findEulerLoop(): List<Graph.Edge> {
 
 //Функция нахождения любого цикла начиная с данной вершины(была вынесена из вышестоящего решения)
 //Либо находит цикл, либо выдаёт null
-fun Graph.findCycleFrom(
+fun Graph.cycleFromStartVertex(
     vertex: Graph.Vertex,
-    addOrNot: (Graph.Edge) -> Boolean
+    addOrNot: (Graph.Edge) -> Boolean = { true }
 ): List<Pair<Graph.Edge, Graph.Vertex>>? {
     //Для проверки на повторы????
     val historyHere = mutableSetOf<Graph.Vertex>()
@@ -228,7 +228,110 @@ fun Graph.minimumSpanningTree(): Graph {
  * Эта задача может быть зачтена за пятый и шестой урок одновременно
  */
 fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
-    TODO()
+    //Простейшие проверки
+    if (vertices.isEmpty()) {
+        return emptySet()
+    }
+
+    // Проверка на наличие циклов
+    //Сложность = O((к-ва вершин) * (к-во рёбер))
+    for (vertex in vertices) {
+        val cycle = cycleFromStartVertex(vertex)
+
+        if (cycle != null) {
+            throw IllegalArgumentException("Cycle found")
+        }
+    }
+
+    //Проверка графа на связность
+    //Попробуем проитерироваться через весь граф и определить прошли ли мы все вершины
+    // Сложность = O(к-ва вершин) для каждого прохода
+
+    val iterationHistory = mutableSetOf<Graph.Vertex>()
+    //Используем LinkedList т.к. итерируемся по нему последовательно
+    val verticesToIterate = LinkedList<Graph.Vertex>()
+
+    //Начинаем с первой вершины графа и идём далее по списку
+    verticesToIterate.add(vertices.first())
+    while (verticesToIterate.isNotEmpty()) {
+        val nextVertex = verticesToIterate.removeFirst()
+        iterationHistory.add(nextVertex)
+        for (vertex in getNeighbors(nextVertex)) {
+            if (!iterationHistory.contains(vertex)) {
+                verticesToIterate.add(vertex)
+            }
+        }
+    }
+
+    //Итоговая проверка на равное количество вершин
+    for (vertex in vertices) {
+        if (vertex !in iterationHistory) {
+            return emptySet()
+        }
+    }
+
+    val vertexHis = mutableSetOf<Graph.Vertex>()
+    //Сложность = O(к-ва вершин)
+    val result = mutableSetOf<Graph.Vertex>()
+
+    //Сложность = O((к-вo вершин)^2)
+    //Затраты памяти = О(к-ва вершин)
+    for (startVertex in vertices) {
+        if (startVertex !in vertexHis) {
+            //Сложность = O(к-ва вершин)
+            //Поиск групп независимых вершин, начиная с данной стартовой и их объединение
+            //Написана вспомогательная ф-ция ниже
+            result.addAll(tryingToFindIndependent(vertexHis, startVertex))
+        }
+    }
+
+    return result
+}
+
+//Вспомогательная ф-ция для поисковика множества независимых вершин
+fun Graph.tryingToFindIndependent(
+    vertexHis: MutableSet<Graph.Vertex>,
+    startVertex: Graph.Vertex
+): MutableSet<Graph.Vertex> {
+    //  Попробуем получить необходимый результат.
+    //  Суть алгоритма такова, что будут проведены две попытки try -
+    //каждая для своего типа граней.
+    //  Заведём переменную-счётчик, которая будет позволять отбирать
+    //вершины по очереди сначала для первой попытки, потом для второй.
+    //  То есть, условно поделим все вершины на "чётные" и "нечётные" и
+    //определим одни в одну, другие в другую попытку и сравним их
+
+    val firstTry = mutableSetOf<Graph.Vertex>()
+    val secondTry = mutableSetOf<Graph.Vertex>()
+
+    //Сложность = O(к-ва вершин)
+    val queue = LinkedList<Pair<Graph.Vertex, Boolean>>()
+    queue.add(startVertex to true)
+
+    //Сложность = O(к-ва вершин)
+    while (queue.isNotEmpty()) {
+        val nextVertex = queue.removeFirst().first
+        val counter = queue.removeFirst().second
+        vertexHis.add(nextVertex)
+
+        if (counter) {
+            firstTry.add(nextVertex)
+        } else {
+            secondTry.add(nextVertex)
+        }
+
+        for (vertex in getNeighbors(nextVertex)) {
+            if (vertex !in vertexHis) {
+                queue.add(vertex to !counter)
+            }
+        }
+    }
+
+    return if (firstTry.size >= secondTry.size) {
+        firstTry
+    } else {
+        secondTry
+    }
 }
 
 /**
@@ -252,5 +355,81 @@ fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
  * Ответ: A, E, J, K, D, C, H, G, B, F, I
  */
 fun Graph.longestSimplePath(): Path {
-    TODO()
+    //Простейшие проверки
+    if (vertices.isEmpty()) {
+        return Path()
+    }
+
+    // Проверка на наличие циклов
+    //Сложность = O((к-ва вершин) * (к-во рёбер))
+    for (vertex in vertices) {
+        val cycle = cycleFromStartVertex(vertex)
+
+        if (cycle != null) {
+            throw IllegalArgumentException("Cycle found")
+        }
+    }
+
+    //Проверка графа на связность
+    //Попробуем проитерироваться через весь граф и определить прошли ли мы все вершины
+    // Сложность = O(к-ва вершин) для каждого прохода
+
+    val iterationHistory = mutableSetOf<Graph.Vertex>()
+    //Используем LinkedList т.к. итерируемся по нему последовательно
+    val verticesToIterate = LinkedList<Graph.Vertex>()
+
+    //Начинаем с первой вершины графа и идём далее по списку
+    verticesToIterate.add(vertices.first())
+    while (verticesToIterate.isNotEmpty()) {
+        val nextVertex = verticesToIterate.removeFirst()
+        iterationHistory.add(nextVertex)
+        for (vertex in getNeighbors(nextVertex)) {
+            if (!iterationHistory.contains(vertex)) {
+                verticesToIterate.add(vertex)
+            }
+        }
+    }
+
+    //Итоговая проверка на равное количество вершин
+    for (vertex in vertices) {
+        if (vertex !in iterationHistory) {
+            return Path()
+        }
+    }
+
+    //Поиск необходимого пути
+    //Сложность = O((к-вo вершин)^2)
+    //Затраты памяти = О(к-ва вершин)
+    val vertexHis = mutableSetOf<Graph.Vertex>()
+    //Сложность = O(к-ва вершин)
+    var result = Path()
+
+    //Сложность = O((к-вo вершин)^2)
+    //Затраты памяти = О(к-ва вершин)
+    for (startVertex in vertices) {
+        if (startVertex !in vertexHis) {
+            //Сложность = O(к-ва вершин)
+            //Поиск групп независимых вершин, начиная с данной стартовой и их объединение
+            //Написана вспомогательная ф-ция ниже
+            result = findLongestVoyagingPath(Path(startVertex)) ?: Path()
+        }
+    }
+
+    return result
+}
+
+fun Graph.findLongestVoyagingPath(
+    currentPath: Path = Path(vertices.first()),
+    bestPath: Path? = null
+): Path? {
+    var best = bestPath
+    for (next in getNeighbors(currentPath.vertices.last())) {
+        if (next !in currentPath) continue
+        val nextPath = Path(currentPath, this, next)
+        if (best != null && best.length <= nextPath.length && !nextPath.isLoop(this)) {
+            best = nextPath
+            findLongestVoyagingPath(nextPath, best) ?: continue
+        }
+    }
+    return best
 }

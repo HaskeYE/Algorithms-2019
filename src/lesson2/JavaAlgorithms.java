@@ -2,7 +2,7 @@ package lesson2;
 
 import kotlin.NotImplementedError;
 
-import javafx.util.Pair;
+import kotlin.Pair;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,6 +38,7 @@ public class JavaAlgorithms {
      * Например, для приведённого выше файла результат должен быть Pair(3, 4)
      * <p>
      * В случае обнаружения неверного формата файла бросить любое исключение.
+     * @return
      */
     //Дейтвительно ли второй момент раньше первого?
     //Ниже - решение для случая когда продавать нужно после покупки
@@ -45,21 +46,21 @@ public class JavaAlgorithms {
         Scanner sc = new Scanner(new File(inputName));
         List<Integer> list = new ArrayList<>();
         while (sc.hasNext()) {
-            Integer n = parseInt(sc.nextLine());
+            int n = parseInt(sc.nextLine());
             if (n < 0) throw new IllegalArgumentException();
             list.add(n);
         }
         Integer min = 0;
-        javafx.util.Pair<Integer, Integer> max = new Pair<>(list.get(1) - min, 1);
+        Pair<Integer, Integer> max = new Pair<>(list.get(1) - min, 1);
         for (int j = 1; j < list.size(); j++) {
             for (int k = j + 1; k <= list.size(); k++) {
-                if (list.get(k) - list.get(j) > max.getKey()) {
+                if (list.get(k) - list.get(j) > max.getFirst()) {
                     min = list.get(k);
                     max = new Pair<>(list.get(k) - list.get(j), list.get(k));
                 }
             }
         }
-        return new Pair<>(min + 1, max.getValue() + 1);
+        return new kotlin.Pair<>(min + 1, max.getSecond() + 1);
     }
 
     /**
