@@ -411,7 +411,8 @@ fun Graph.longestSimplePath(): Path {
             //Сложность = O(к-ва вершин)
             //Поиск групп независимых вершин, начиная с данной стартовой и их объединение
             //Написана вспомогательная ф-ция ниже
-            result = findLongestVoyagingPath(Path(startVertex)) ?: Path()
+            val newResult = findLongestVoyagingPath(Path(startVertex)) ?: Path()
+            if (newResult.length > result.length) result = newResult
         }
     }
 
