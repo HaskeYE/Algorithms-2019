@@ -2,6 +2,8 @@
 
 package lesson6
 
+import kotlin.math.max
+
 /**
  * Наибольшая общая подпоследовательность.
  * Средняя
@@ -15,8 +17,115 @@ package lesson6
  * При сравнении подстрок, регистр символов *имеет* значение.
  */
 fun longestCommonSubSequence(first: String, second: String): String {
-    TODO()
+    // Использован алгоритм Хиршберга, позволяющий уменьшить затраты памяти
+    //до минимальных равным затратам на меньшую из строк
+    //Первые элементарные проверки
+    if (first.isEmpty() || second.isEmpty()) {
+        return ""
+    }
+    //Проверка на равенство
+    //Сложность = O(длинны первого)
+    if (second.length == 1) {
+        for (it in first) {
+            if (it == second.first()) {
+                return it.toString()
+            }
+        }
+
+        return ""
+    }
+
+    //Сложность = O(длинна первого + длинна второго)
+    val secondLowerPart = second.substring(0 until second.length / 2)
+    val secondUpperPart = second.substring(second.length / 2)
+    val secondUpperPartReversed = secondUpperPart.reversed()
+    val firstReversed = first.reversed()
+
+    //Память: O(длинны первого)
+    //Сложность = O(длинна первого * длинну второго)
+    val lowerPartRow = longestCommonSubsequenceLengthsRun(first, secondLowerPart)
+    val upperPartRow = longestCommonSubsequenceLengthsRun(firstReversed, secondUpperPartReversed)
+
+    //Попытка найти длиннейшую подстроку, от которой будем отталкиваться
+    var max = upperPartRow.last()
+    var maxIndex = 0
+
+    // Проверяем длинну
+    if (lowerPartRow.last() > max) {
+        max = lowerPartRow.last()
+        maxIndex = first.length
+    }
+
+    //Проверка всех найденных элементов на полезность
+    for (it in 1 until first.length) {
+        val newer = lowerPartRow[it - 1] + upperPartRow[first.length - it - 1]
+
+        if (newer > max) {
+            max = newer
+            maxIndex = it
+        }
+    }
+
+    return longestCommonSubSequence(
+        first.substring(0 until maxIndex),
+        secondLowerPart
+    ) + longestCommonSubSequence(
+        first.substring(maxIndex),
+        secondUpperPart
+    )
 }
+
+
+//Дополнительный пробег обычной же версии longestCommonSubSequence, однако без запоминания
+//Облегчённый алгоритм пробега для меньших подстрок
+fun longestCommonSubsequenceLengthsRun(first: String, second: String): IntArray {
+    //Сложность = O(длинны первого)
+    if (first.isEmpty() || second.isEmpty()) {
+        return IntArray(first.length) { 0 }
+    }
+
+    //Сложность = O(длинны первого)
+    val row = IntArray(first.length)
+
+    if (first.first() == second.first()) {
+        row[0] = 1
+    }
+
+    // Первый пробег
+    //Сложность = O(длинны первого)
+    for (it in 1 until row.size) {
+        if (first[it] == second.first()) {
+            row[it] = 1
+        } else {
+            row[it] = row[it - 1]
+        }
+    }
+
+    //Сложность = O(длинна первого * длинну второго)
+    for (that in 1 until second.length) {
+        //Сложность = O(длинны первого)
+        val newRow = IntArray(first.length)
+        if (first.first() == second[that]) {
+            newRow[0] = 1
+        } else {
+            newRow[0] = row[0]
+        }
+
+        //Сложность = O(длинны первого)
+        for (it in 1 until row.size) {
+            if (first[it] == second[that]) {
+                newRow[it] = row[it - 1] + 1
+            } else {
+                newRow[it] = max(newRow[it - 1], row[it])
+            }
+        }
+        for (it in row.indices) {
+            row[it] = newRow[it]
+        }
+    }
+    return row
+}
+
 
 /**
  * Наибольшая возрастающая подпоследовательность
