@@ -2,6 +2,7 @@
 
 package lesson6
 
+import java.util.*
 import kotlin.math.max
 
 /**
@@ -139,8 +140,52 @@ fun longestCommonSubsequenceLengthsRun(first: String, second: String): IntArray 
  * то вернуть ту, в которой числа расположены раньше (приоритет имеют первые числа).
  * В примере ответами являются 2, 8, 9, 12 или 2, 5, 9, 12 -- выбираем первую из них.
  */
+//Сначала составим список с данными о максимальной длинне подпоследовательности, оканчивающейся
+//на числе с индексом равным индексу нового списка(listMax). Также храним список того
+//в каком месте достигся максимум для каждого значения для восстановления ответа(prev)
+//Сложность: O(n^2)
 fun longestIncreasingSubSequence(list: List<Int>): List<Int> {
-    TODO()
+    //Элементарные проверки
+    if (list.isEmpty()) {
+        return emptyList()
+    }
+
+    if (list.size == 1) {
+        return listOf(list.first())
+    }
+
+    val n: Int = list.size //размер исходной последовательности
+
+    val prev = IntArray(n)
+    val listMax = IntArray(n)
+
+    for (i in list.indices) {
+        listMax[i] = 1
+        prev[i] = -1
+        for (j in 0 until i)
+            if (list[j] < list[i] && (listMax[j] + 1) > listMax[i]) {
+                listMax[i] = listMax[j] + 1
+                prev[i] = j
+            }
+    }
+
+    var pos = 0 // Для индекса последнего элемента НВП
+    var maxLength = listMax[0] // Для длинны НВП
+
+    for (i in list.indices)
+        if (listMax[i] > maxLength) {
+            pos = i
+            maxLength = listMax[i]
+        }
+
+    // Восстановление ответа
+    val answer = Vector<Int>()
+    while (pos != -1) {
+        answer.add(list[pos])
+        pos = prev[pos]
+    }
+    //Т.к. ответ был получен в обратном порядке необходимо его инвертировать
+    return answer.reversed().toList()
 }
 
 /**
