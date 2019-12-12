@@ -2,8 +2,11 @@
 
 package lesson6
 
+import java.io.File
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Наибольшая общая подпоследовательность.
@@ -17,6 +20,9 @@ import kotlin.math.max
  * Если есть несколько самых длинных общих подпоследовательностей, вернуть любую из них.
  * При сравнении подстрок, регистр символов *имеет* значение.
  */
+
+//Затраты по времени: О(длинны первого * длинну второго)
+//Затраты памяти: О(меньшей из двух длин)
 fun longestCommonSubSequence(first: String, second: String): String {
     // Использован алгоритм Хиршберга, позволяющий уменьшить затраты памяти
     //до минимальных равным затратам на меньшую из строк
@@ -80,7 +86,7 @@ fun longestCommonSubSequence(first: String, second: String): String {
 //Дополнительный пробег обычной же версии longestCommonSubSequence, однако без запоминания
 //Облегчённый алгоритм пробега для меньших подстрок
 fun longestCommonSubsequenceLengthsRun(first: String, second: String): IntArray {
-    //Сложность = O(длинны первого)
+    //Сложность по времени = O(длинны первого)
     if (first.isEmpty() || second.isEmpty()) {
         return IntArray(first.length) { 0 }
     }
@@ -143,7 +149,7 @@ fun longestCommonSubsequenceLengthsRun(first: String, second: String): IntArray 
 //Сначала составим список с данными о максимальной длинне подпоследовательности, оканчивающейся
 //на числе с индексом равным индексу нового списка(listMax). Также храним список того
 //в каком месте достигся максимум для каждого значения для восстановления ответа(prev)
-//Сложность: O(n^2)
+//Сложность по времени: О(к-во^2) и по памяти О(к-ва)
 fun longestIncreasingSubSequence(list: List<Int>): List<Int> {
     //Элементарные проверки
     if (list.isEmpty()) {
@@ -208,8 +214,50 @@ fun longestIncreasingSubSequence(list: List<Int>): List<Int> {
  *
  * Здесь ответ 2 + 3 + 4 + 1 + 2 = 12
  */
+
+//Затраты на время и память: О(длинна поля * ширину поля)
+//  Классическая задача двумерного динамического программирования
+//  Будем перестраивать поле, заменяя каждое значение на нём весом оптимального маршрута до
+//него же, таким образом и получим последним оптимальный вес маршрута да крайней правой нижней ячейки
 fun shortestPathOnField(inputName: String): Int {
-    TODO()
+    //Используем массив числовых массивов для симуляции поля и простоты пониания
+    val field = ArrayList<IntArray>()
+
+    // Сложность: О(длинна поля * ширину поля)
+    File(inputName).forEachLine { line ->
+        field.add(line.split(" ").map { it.toInt() }.toIntArray())
+    }
+
+    if (
+        field.isEmpty() || field.first().isEmpty()
+    ) {
+        return 0
+    }
+
+    val width = field.first().size
+    val height = field.size
+
+    //Нам нужнен в данном случае верхний ряд, чтобы от него отталкиваться,
+    //поэтому определяем все значения верхнего ряда
+    // Сложность: О(ширины поля)
+    for (j in 1 until width) {
+        field[0][j] += field[0][j - 1]
+    }
+
+    //Поиск оптимального значения, путём выбора из какой ячейки выгодней прийти в данную
+    // Сложность: О(длинна поля * ширину поля)
+    for (i in 1 until height) {
+        for (j in 0 until width) {
+            if (j == 0) field[i][0] += field[i - 1][0] else {
+                val goingUp = field[i - 1][j] + field[i][j]
+                val goingLeft = field[i][j - 1] + field[i][j]
+                val goingDiagonally = field[i - 1][j - 1] + field[i][j]
+                field[i][j] = min(min(goingUp, goingLeft), goingDiagonally)
+            }
+        }
+    }
+    //Возвращаем новое значение крайней ячейки
+    return field[height - 1][width - 1]
 }
 
 // Задачу "Максимальное независимое множество вершин в графе без циклов"
