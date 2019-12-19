@@ -1,5 +1,7 @@
 package lesson4
 
+
+
 class OpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T>() {
     init {
         require(bits in 2..31)
@@ -48,8 +50,23 @@ class OpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T>(
     /**
      * Для этой задачи пока нет тестов, но вы можете попробовать привести решение и добавить к нему тесты
      */
+    //Сложность: О(к-ва элементов)
+    //Память: О(к-ва элементов)
     override fun remove(element: T): Boolean {
-        TODO("not implemented")
+        val startingIndex = element.startingIndex()
+        var index = element.startingIndex()
+        var current = storage[index]
+
+        while (current != null) {
+            if (current == element) {
+                storage[index] = null
+                size -= 1
+            }
+            index = (index + 1) % capacity
+            if (index == startingIndex) return false
+            current = storage[index]
+        }
+        return true
     }
 
     /**
