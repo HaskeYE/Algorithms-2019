@@ -1,7 +1,6 @@
 package lesson4
 
 
-
 class OpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T>() {
     init {
         require(bits in 2..31)
@@ -72,7 +71,29 @@ class OpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T>(
     /**
      * Для этой задачи пока нет тестов, но вы можете попробовать привести решение и добавить к нему тесты
      */
-    override fun iterator(): MutableIterator<T> {
-        TODO("not implemented")
+    override fun iterator(): MutableIterator<T> = SetIterator()
+
+    inner class SetIterator internal constructor() : MutableIterator<T> {
+        private var currentIndex = 0
+        private var nextIndex = 0
+
+        private var current: T? = null
+
+        override fun hasNext(): Boolean = nextIndex < capacity
+
+        override fun next(): T {
+            if (nextIndex < capacity) {
+                nextIndex++
+                currentIndex++
+            }
+            return storage[currentIndex] as T
+        }
+
+        override fun remove() {
+            if (current != null) {
+                storage[currentIndex] = null
+                size -= 1
+            }
+        }
     }
 }

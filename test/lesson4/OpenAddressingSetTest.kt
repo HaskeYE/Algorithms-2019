@@ -49,6 +49,21 @@ class OpenAddressingSetTest {
         set.add("Omega")
         set.remove("Omega")
         assertSame(false, set.remove("Nothing"))
+    }
+
+    @Test
+    @Tag("New")
+    fun iterator() {
+        val set = OpenAddressingSet<String>(16)
+        assertTrue(set.isEmpty())
+        set.add("Alpha")
+        set.add("Beta")
+        set.add("Omega")
+        set.remove("Omega")
+        val i = set.iterator()
+        i.next()
+        i.remove()
+        assertSame(false, set.contains("Alpha"))
 
     }
 }
