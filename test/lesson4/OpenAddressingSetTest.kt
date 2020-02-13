@@ -1,9 +1,8 @@
 package lesson4
 
-import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Tag
+import kotlin.test.Test
+import kotlin.test.*
 import org.junit.jupiter.api.assertThrows
 import java.lang.IllegalArgumentException
 

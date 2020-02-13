@@ -1,7 +1,8 @@
 package lesson6
 
 import org.junit.jupiter.api.Tag
-import kotlin.test.Test
+//import kotlin.test.Test
+import org.junit.jupiter.api.Test
 
 class DynamicTestsKotlin : AbstractDynamicTests() {
 

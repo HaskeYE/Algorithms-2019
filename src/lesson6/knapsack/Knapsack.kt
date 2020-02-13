@@ -5,6 +5,18 @@ import java.util.*
 data class Fill(val cost: Int, val items: Set<Item>) {
     operator fun plus(fill: Fill) = Fill(cost + fill.cost, items + fill.items)
 
+    fun remove(item: Item) = Fill(cost - item.cost, items - item)
+
+    fun add(item: Item) = Fill(cost + item.cost, items + item)
+
+    fun getLoad(): Int {
+        var load = 0
+        items.forEach { load += it.weight }
+        return load
+    }
+
+    fun addAll(items: Collection<Item>) = items.forEach { this.add(it) }
+
     constructor(cost: Int, vararg items: Item) : this(cost, items.toSet())
 
     constructor(item: Item) : this(item.cost, item)
