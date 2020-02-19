@@ -8,6 +8,7 @@ import lesson6.knapsack.Fill
 import lesson6.knapsack.Item
 import lesson6.knapsack.fillKnapsackDynamic
 import lesson6.knapsack.fillKnapsackGreedy
+import java.util.concurrent.ThreadLocalRandom
 
 
 // Примечание: в этом уроке достаточно решить одну задачу
@@ -23,33 +24,48 @@ import lesson6.knapsack.fillKnapsackGreedy
  * (не забудьте изменить тесты так, чтобы они передавали эти параметры)
  */
 
-/** Попытка решить задачу, используя алгоритм "Tabu List".
-Будет выбрано решение, используя fillGreedy, то есть набраны условно самые полезные предметы.
-Далее буду заменять данные предметы более лёгкими, попутно занося заменённые предметы в tabuList.
-
-Новые элементы будут искаться способами динамического программирования.
-
-TabuList отдельно реализован не будет для экономии памяти - элементы из items
-просто будут убираться после использования*/
+/** Попытка решить задачу, используя генетический алгоритм
+ * Попробую отбирать случайные предметы в рюкзак. Дано будет 6 попыток что-либо положить
+ * Далее population подобных рюкзаков будут выбраны в качестве начальной популяции
+ * После этого начнётся скрещивание, условием окончания которого будет являться превышение или равенство одним из
+ * рюкзаков стоимости рюкзака, укомплектованного жадным алгоритмом
+ * Скрещиваться будут соседние особи
+ * Скрещивание - заполнение рюкзака динамически от элементов двух родителей*/
 //Затраты памяти: О(длинны items)
-fun fillKnapsackHeuristics(load: Int, items: List<Item>, vararg parameters: Any): Fill {
-    var itemsTabu = items.toMutableList()
-    var knap = fillKnapsackGreedy(load, items)
-    itemsTabu.removeAll(knap.items)
-    val itemsToReplace = knap.items
-
-    for (item in itemsToReplace) {
-        val oldKnap = knap
-        knap.remove(item)
-        val newLoad = load - knap.getLoad()
-        val knapNewDyn = fillKnapsackDynamic(newLoad, itemsTabu)
-        if (oldKnap.cost < (knap + knapNewDyn).cost) {
-            knap += knapNewDyn
-            itemsTabu.removeAll(knapNewDyn.items)
-        } else knap = oldKnap
+fun fillKnapsackHeuristics(load: Int, items: List<Item>, population: Int): Fill {
+    var knaps = mutableListOf<Fill>()
+    val greedy = fillKnapsackGreedy(load, items)
+    var i = 0
+    while (i < population) knaps[i] = randomItems(load, items)
+    while (knaps.size > 1) {
+        for (j in 0..(knaps.size - 2)) {
+            val newItemList = knaps[j].items.toList() + knaps[j + 1].items
+            knaps[j] = fillKnapsackDynamic(load, newItemList)
+            if (knaps[j].cost >= greedy.cost) return knaps[j]
+        }
     }
+    return knaps[0]
+}
 
-    return knap
+//Вариант, если для алгоритма потребуется обоих родителей выбирать случайно
+//Для такого варианта будет выбрано (populationHere/2) пар родителей и они будут скрещены
+fun randomParents(populationHere: Int): Pair<Int, Int> {
+    val first = ThreadLocalRandom.current().nextInt(0, populationHere - 1)
+    var second = first
+    while (first == second)
+        second = ThreadLocalRandom.current().nextInt(0, populationHere - 1)
+    return Pair(first, second)
+}
+
+fun randomItems(load: Int, items: List<Item>): Fill {
+    var steps = 0
+    val knap = Fill(0, emptySet())
+    while (steps <= 6) {
+        val randomItem = items[ThreadLocalRandom.current().nextInt(0, items.size - 1)]
+        if (randomItem.weight <= load - knap.getLoad()) knap.add(randomItem)
+        steps++
+    }
+    return if (knap.cost == 0) randomItems(load, items) else knap
 }
 
 /**

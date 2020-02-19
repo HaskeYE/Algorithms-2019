@@ -14,7 +14,7 @@ class HeuristicsTestsKotlin : AbstractHeuristicsTests() {
         val items = listOf(Item(8, 10), Item(5, 12), Item(6, 8), Item(10, 15), Item(4, 2))
         assertSame(
             true,
-            fillKnapsackHeuristics(30, items).cost >= fillKnapsackGreedy(30, items).cost
+            fillKnapsackHeuristics(30, items, 8).cost >= fillKnapsackGreedy(30, items).cost
         )
     }
 
