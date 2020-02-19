@@ -2,16 +2,23 @@ package lesson6.knapsack
 
 import java.util.*
 
-data class Fill(val cost: Int, val items: Set<Item>) {
+data class Fill(var cost: Int, var items: Set<Item>) {
     operator fun plus(fill: Fill) = Fill(cost + fill.cost, items + fill.items)
 
-    fun remove(item: Item) = Fill(cost - item.cost, items - item)
+    fun remove(item: Item) {
+        this.cost - item.cost
+        this.items - item
+    }
 
-    fun add(item: Item) = Fill(cost + item.cost, items + item)
+    fun add(item: Item) {
+        this.cost = this.cost + item.cost
+        this.items = this.items + item
+    }
 
     fun getLoad(): Int {
         var load = 0
-        items.forEach { load += it.weight }
+        for (item in this.items)
+            load += item.weight
         return load
     }
 

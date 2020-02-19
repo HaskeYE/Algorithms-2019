@@ -18,7 +18,6 @@ class HeuristicsTestsKotlin : AbstractHeuristicsTests() {
         )
     }
 
-
     @Test
     @Tag("Impossible")
     fun testFindVoyagingPathHeuristics() {

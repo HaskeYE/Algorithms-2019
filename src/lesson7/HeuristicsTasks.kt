@@ -36,13 +36,17 @@ fun fillKnapsackHeuristics(load: Int, items: List<Item>, population: Int): Fill 
     var knaps = mutableListOf<Fill>()
     val greedy = fillKnapsackGreedy(load, items)
     var i = 0
-    while (i < population) knaps[i] = randomItems(load, items)
+    while (i < population) {
+        knaps.add(i, randomItems(load, items))
+        i++
+    }
     while (knaps.size > 1) {
         for (j in 0..(knaps.size - 2)) {
             val newItemList = knaps[j].items.toList() + knaps[j + 1].items
             knaps[j] = fillKnapsackDynamic(load, newItemList)
             if (knaps[j].cost >= greedy.cost) return knaps[j]
         }
+        knaps.removeAt(knaps.lastIndex)
     }
     return knaps[0]
 }
@@ -59,10 +63,11 @@ fun randomParents(populationHere: Int): Pair<Int, Int> {
 
 fun randomItems(load: Int, items: List<Item>): Fill {
     var steps = 0
-    val knap = Fill(0, emptySet())
-    while (steps <= 6) {
+    var knap = Fill(0, emptySet())
+    while (steps < 6) {
         val randomItem = items[ThreadLocalRandom.current().nextInt(0, items.size - 1)]
-        if (randomItem.weight <= load - knap.getLoad()) knap.add(randomItem)
+        var knapLoad = knap.getLoad()
+        if (randomItem.weight <= (load - knapLoad)) knap.add(randomItem)
         steps++
     }
     return if (knap.cost == 0) randomItems(load, items) else knap
