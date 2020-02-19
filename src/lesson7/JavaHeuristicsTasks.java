@@ -24,6 +24,7 @@ public class JavaHeuristicsTasks {
      */
     public static Fill fillKnapsackHeuristics(int load, List<Item> items, Object... parameters) {
         throw new NotImplementedError();
+
     }
 
     /**
